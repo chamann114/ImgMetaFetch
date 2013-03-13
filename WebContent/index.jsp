@@ -7,10 +7,8 @@
 <title>Image Meta Fetch</title>
 
 </head>
-<form action="ImgMeta " method="POST">
-		Web URL: <input type="text" name="webUrl" size="30"><br>
-        Number of Producers: <input type="text" name="num_prod" size="10"><br>
-        Number of Consumers: <input type="text" name="num_cons" size="10">
+<form action="img " method="POST">
+		Web URL: <input type="text" name="webUrl" size="30">
         <br><br>
         <input type="submit" value="Submit">
     </form>
