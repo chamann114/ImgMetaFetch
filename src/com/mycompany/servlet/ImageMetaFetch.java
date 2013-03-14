@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -114,42 +115,30 @@ class ImageAndData {
 	}
 }
 
-class Q {
-	ImageAndData n;
-	boolean valueSet = false;
+class SyncQueue {
+	LinkedList <ImageAndData> l = new LinkedList<ImageAndData>();
 	
 	synchronized ImageAndData get() {
-		if(!valueSet)
+		if(l.size() == 0)
 			try {
 				wait();
 			} 
 			catch(InterruptedException e) {
 				System.out.println("InterruptedException caught");
 			}
-		ImageAndData ret = n;
-		n = new ImageAndData();
-		valueSet = false;
-		notify();
+		ImageAndData ret = l.pop();
 		return ret;
 	}
 
 	synchronized void put(ImageAndData n) {
-		if(valueSet)
-			try {
-				wait();
-			}
-			catch(InterruptedException e) {
-				System.out.println("InterruptedException caught");
-			}
-		this.n = n;
-		valueSet = true;
+		this.l.add(n);
 		notify();
-	   }
+		}
 }
 
 class Producer implements Runnable {
-	Q q; String [] imgs; String dir;
-	Producer(Q q,String [] i,String d) {
+	SyncQueue q; String [] imgs; String dir;
+	Producer(SyncQueue q,String [] i,String d) {
 		this.q = q;
 		this.imgs = i;
 		this.dir = d;
@@ -181,8 +170,8 @@ class Producer implements Runnable {
 }
 
 class Consumer implements Runnable {
-	Q q; int num; PrintWriter out;
-	Consumer(Q q,int n,PrintWriter o) {
+	SyncQueue q; int num; PrintWriter out;
+	Consumer(SyncQueue q,int n,PrintWriter o) {
 		this.q = q;
 		this.num = n;
 		this.out = o;
@@ -307,7 +296,7 @@ public class ImageMetaFetch extends HttpServlet {
     	img_count = 0;
     	
     	String currentdir = getServletContext().getRealPath("/");
-        Q q = new Q();
+        SyncQueue q = new SyncQueue();
         
         String tmp_url = request.getParameter("webUrl").toString();
         String url;
